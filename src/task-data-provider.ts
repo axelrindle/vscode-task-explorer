@@ -37,7 +37,7 @@ export class GroupItem extends TreeItem {
             return
         }
 
-        const file = join(__filename, '..', '..', '..', 'resources', 'icons', `${name}.svg`)
+        const file = join(__dirname, '..', 'resources', 'icons', `${name}.svg`)
 
         try {
             const stats = await stat(file)

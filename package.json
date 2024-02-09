@@ -24,7 +24,7 @@
     },
     "homepage": "https://github.com/axelrindle/vscode-task-explorer#readme",
     "activationEvents": [],
-    "main": "./out/src/extension.js",
+    "main": "./out/main.js",
     "contributes": {
         "commands": [
             {
@@ -98,12 +98,15 @@
         }
     },
     "scripts": {
-        "vscode:prepublish": "npm run compile",
-        "compile": "tsc -p ./",
-        "watch": "tsc -watch -p ./",
+        "vscode:prepublish": "npm run esbuild-base -- --minify",
+        "esbuild-base": "esbuild ./src/extension.ts --bundle --outfile=out/main.js --external:vscode --format=cjs --platform=node",
+        "esbuild": "npm run esbuild-base -- --sourcemap",
+        "esbuild-watch": "npm run esbuild-base -- --sourcemap --watch",
+        "test-compile": "tsc -p ./",
         "pretest": "npm run compile && npm run lint",
         "lint": "eslint src --ext ts",
-        "test": "vscode-test"
+        "test": "vscode-test",
+        "package": "vsce package"
     },
     "devDependencies": {
         "@types/mocha": "^10.0.6",
@@ -113,6 +116,8 @@
         "@typescript-eslint/parser": "^6.19.1",
         "@vscode/test-cli": "^0.0.4",
         "@vscode/test-electron": "^2.3.9",
+        "@vscode/vsce": "^2.23.0",
+        "esbuild": "^0.20.0",
         "eslint": "^8.56.0",
         "typescript": "^5.3.3"
     },
