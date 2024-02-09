@@ -6,7 +6,7 @@ const __dirname = dirname(fileURLToPath(import.meta.url))
 
 export default defineConfig({
 	files: 'out/test/**/*.js',
-    workspaceFolder: join(__dirname, 'test/fixtures'),
+    workspaceFolder: join(__dirname, 'src/test/fixtures'),
     extensionDevelopmentPath: __dirname,
     platform: 'desktop',
 })

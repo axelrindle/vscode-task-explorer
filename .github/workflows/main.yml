@@ -20,18 +20,25 @@ jobs:
     - name: Install Node.js
       uses: actions/setup-node@v4
       with:
-        node-version: 18.x
+        node-version: 18.15.x
         cache: 'npm'
     - run: npm ci
-    - name: Cache .vscode-test
+
+    - name: Restore .vscode-test
+      uses: actions/cache/restore@v4
+      with:
+        path: .vscode-test
+        key: ${{ runner.os }}-test
+    - run: xvfb-run -a npm test
+      if: runner.os == 'Linux'
+    - run: npm test
+      if: runner.os != 'Linux'
+    - name: Restore .vscode-test
       uses: actions/cache/save@v4
       with:
         path: .vscode-test
         key: ${{ runner.os }}-test
-    # - run: xvfb-run -a npm test
-    #   if: runner.os == 'Linux'
-    # - run: npm test
-    #   if: runner.os != 'Linux'
+
     - name: Set nightly version
       run: |
         timestamp=$(date +%Y%m%d%H%M%S)
