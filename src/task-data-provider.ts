@@ -1,9 +1,8 @@
 import { createHash } from 'crypto'
 import { stat } from 'fs/promises'
 import { join } from 'path'
-import { groupBy } from "remeda"
-import { Command, Event, EventEmitter, ProgressLocation, ProviderResult, Task, ThemeIcon, TreeDataProvider, TreeItem, TreeItemCollapsibleState, tasks, window, workspace } from "vscode"
-import { EXTENSION_ID } from './extension'
+import { groupBy } from 'remeda'
+import { Command, Event, EventEmitter, ProgressLocation, ProviderResult, Task, ThemeIcon, TreeDataProvider, TreeItem, TreeItemCollapsibleState, tasks, window } from 'vscode'
 import Config from './config'
 
 function makeTaskId(task: Task): string {
@@ -33,9 +32,9 @@ class GroupItem extends TreeItem {
 
         // use product icons where applicable
         switch (name) {
-            case 'shell':
-                this.iconPath = new ThemeIcon('terminal-view-icon')
-                return
+        case 'shell':
+            this.iconPath = new ThemeIcon('terminal-view-icon')
+            return
         }
 
         const file = join(__filename, '..', '..', 'resources', 'icons', `${name}.svg`)
@@ -72,11 +71,11 @@ class TaskItem extends TreeItem {
         this.command = command
     }
 
-    contextValue = 'taskItem';
+    contextValue = 'taskItem'
 
 }
 
-type TaskList = Record<string, TaskItem[]>
+type TaskList = Record<string, TaskItem[]>;
 
 export default class TaskDataProvider implements TreeDataProvider<TreeItem> {
 
@@ -128,10 +127,6 @@ export default class TaskDataProvider implements TreeDataProvider<TreeItem> {
                 cancellable: false,
             },
             async () => {
-                await new Promise((resolve, reject) => {
-                    setTimeout(resolve, 1000)
-                })
-
                 const list = await this.fetchTasks()
 
                 this.tasks = groupBy(

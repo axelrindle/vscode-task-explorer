@@ -1,5 +1,5 @@
 import { ExtensionContext, WorkspaceConfiguration, workspace } from 'vscode'
-import TypedEventEmitter, { EventTypes } from './events'
+import TypedEventEmitter from './events'
 import { EXTENSION_ID } from './extension'
 
 export interface ConfigSchema {

@@ -1,6 +1,6 @@
-import { ExtensionContext, ProgressLocation, commands, window, workspace } from "vscode"
-import TaskDataProvider from "./task-data-provider"
+import { ExtensionContext, commands, window } from 'vscode'
 import Config from './config'
+import TaskDataProvider from './task-data-provider'
 
 export const EXTENSION_ID = 'task-explorer'
 

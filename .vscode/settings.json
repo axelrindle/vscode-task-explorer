@@ -6,12 +6,22 @@
     "search.exclude": {
         "out": true // set this to false to include "out" folder in search results
     },
-    // Turn off tsc task auto detection since we have the necessary tasks as npm scripts
-    "typescript.tsc.autoDetect": "off",
+
+    "eslint.enable": true,
     "editor.defaultFormatter": "dbaeumer.vscode-eslint",
     "editor.codeActionsOnSave": {
         "source.fixAll.eslint": "explicit"
     },
+
+    "[json]": {
+        "editor.defaultFormatter": "vscode.json-language-features"
+    },
+    "[jsonc]": {
+        "editor.defaultFormatter": "vscode.json-language-features"
+    },
+
+    // Turn off tsc task auto detection since we have the necessary tasks as npm scripts
+    "typescript.tsc.autoDetect": "off",
     "typescript.preferences.quoteStyle": "single",
     "typescript.format.semicolons": "remove",
     "[typescript]": {
