@@ -1,0 +1,19 @@
+{
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "echo",
+            "command": "echo",
+            "type": "shell",
+            "args": [
+                "Hello World"
+            ],
+            "problemMatcher": [],
+            "presentation": {
+                "reveal": "always",
+                "group": "shell"
+            },
+            "group": "build"
+        }
+    ]
+}

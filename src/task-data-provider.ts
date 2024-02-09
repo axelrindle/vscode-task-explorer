@@ -1,7 +1,7 @@
 import { createHash } from 'crypto'
 import { stat } from 'fs/promises'
 import { join } from 'path'
-import { groupBy } from 'remeda'
+import { groupBy, identity } from 'remeda'
 import { Command, Event, EventEmitter, ProgressLocation, ProviderResult, Task, ThemeIcon, TreeDataProvider, TreeItem, TreeItemCollapsibleState, tasks, window } from 'vscode'
 import Config from './config'
 
@@ -13,7 +13,7 @@ function makeTaskId(task: Task): string {
 /**
  * Represents a task group (e.g. npm, shell, etc.)
  */
-class GroupItem extends TreeItem {
+export class GroupItem extends TreeItem {
 
     constructor(
         label: string
@@ -37,7 +37,7 @@ class GroupItem extends TreeItem {
             return
         }
 
-        const file = join(__filename, '..', '..', 'resources', 'icons', `${name}.svg`)
+        const file = join(__filename, '..', '..', '..', 'resources', 'icons', `${name}.svg`)
 
         try {
             const stats = await stat(file)
@@ -54,7 +54,7 @@ class GroupItem extends TreeItem {
 
 }
 
-class TaskItem extends TreeItem {
+export class TaskItem extends TreeItem {
 
     readonly id: string
     readonly group: string
@@ -95,8 +95,20 @@ export default class TaskDataProvider implements TreeDataProvider<TreeItem> {
         this.refresh()
     }
 
+    getTreeItem(element: TreeItem): TreeItem {
+        return element
+    }
+
+    getChildren(element?: TreeItem | undefined): ProviderResult<TreeItem[]> {
+        if (element) {
+            return this.tasks[element.label as string]
+        }
+
+        return this.groups
+    }
+
     private buildArguments(item: Task): string[] {
-        if (item.definition.type === 'shell') {
+        if (item.source === 'Workspace') {
             return [item.name]
         }
 
@@ -142,16 +154,8 @@ export default class TaskDataProvider implements TreeDataProvider<TreeItem> {
         )
     }
 
-    getTreeItem(element: TreeItem): TreeItem {
-        return element
-    }
-
-    getChildren(element?: TreeItem | undefined): ProviderResult<TreeItem[]> {
-        if (element) {
-            return this.tasks[element.label as string]
-        }
-
-        return this.groups
+    getTasks(): TaskItem[] {
+        return Object.values(this.tasks).flatMap(identity)
     }
 
 }
