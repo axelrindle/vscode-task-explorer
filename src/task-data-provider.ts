@@ -3,12 +3,17 @@ import { stat } from 'fs/promises'
 import { join } from 'path'
 import { groupBy } from "remeda"
 import { Command, Event, EventEmitter, ProgressLocation, ProviderResult, Task, ThemeIcon, TreeDataProvider, TreeItem, TreeItemCollapsibleState, tasks, window, workspace } from "vscode"
+import { EXTENSION_ID } from './extension'
+import Config from './config'
 
 function makeTaskId(task: Task): string {
-    const id = task.definition.type + '-' + task.name + '-' + task.scope ?? 'global'
+    const id = `${task.definition.type}-${task.name.replace(/\s+/g, '_').toLocaleLowerCase()}-${task.source}`
     return createHash('md5').update(id).digest('hex')
 }
 
+/**
+ * Represents a task group (e.g. npm, shell, etc.)
+ */
 class GroupItem extends TreeItem {
 
     constructor(
@@ -25,9 +30,12 @@ class GroupItem extends TreeItem {
 
     private async setIconPath() {
         const name = this.iconName()
-        if (name === 'shell') {
-            this.iconPath = new ThemeIcon('terminal-view-icon')
-            return
+
+        // use product icons where applicable
+        switch (name) {
+            case 'shell':
+                this.iconPath = new ThemeIcon('terminal-view-icon')
+                return
         }
 
         const file = join(__filename, '..', '..', 'resources', 'icons', `${name}.svg`)
@@ -64,7 +72,7 @@ class TaskItem extends TreeItem {
         this.command = command
     }
 
-    contextValue = 'task';
+    contextValue = 'taskItem';
 
 }
 
@@ -72,26 +80,43 @@ type TaskList = Record<string, TaskItem[]>
 
 export default class TaskDataProvider implements TreeDataProvider<TreeItem> {
 
+    private config: Config
+
     private groups: TreeItem[] = []
     private tasks: TaskList = {}
 
     private _onDidChangeTreeData: EventEmitter<TreeItem | undefined | void> = new EventEmitter<TreeItem | undefined | void>()
     readonly onDidChangeTreeData: Event<TreeItem | undefined | void> = this._onDidChangeTreeData.event
 
-    constructor() {
+    constructor(config: Config) {
+        this.config = config
+
+        this.config.on('change', () => this.refresh())
+
         this.refresh()
+    }
+
+    private buildArguments(item: Task): string[] {
+        if (item.definition.type === 'shell') {
+            return [item.name]
+        }
+
+        return [
+            `${item.definition.type}: ${item.name}`
+        ]
     }
 
     private async fetchTasks(): Promise<TaskItem[]> {
         const list = await tasks.fetchTasks()
 
+        const excludedGroups = this.config.get('excludeGroups')
+
         return list
+            .filter(item => !excludedGroups?.includes(item.definition.type))
             .map(item => new TaskItem(item, {
                 command: 'workbench.action.tasks.runTask',
                 title: 'Run this task',
-                arguments: [
-                    `${item.definition.type}: ${item.name}`
-                ],
+                arguments: this.buildArguments(item),
             }))
             .sort((a, b) => (a.label as string).localeCompare(b.label as string))
     }
