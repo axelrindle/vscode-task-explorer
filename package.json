@@ -21,18 +21,12 @@
             {
                 "command": "task-explorer.favorite-task",
                 "title": "Add task to favorites",
-                "icon": {
-                    "light": "extensions-star-full",
-                    "dark": "extensions-star-full"
-                }
+                "icon": "$(extensions-star-empty)"
             },
             {
                 "command": "task-explorer.unfavorite-task",
                 "title": "Remove task from favorites",
-                "icon": {
-                    "light": "extensions-star-empty",
-                    "dark": "extensions-star-empty"
-                }
+                "icon": "$(extensions-star-full)"
             }
         ],
         "viewsContainers": {
@@ -74,6 +68,19 @@
                     "group": "inline"
                 }
             ]
+        },
+        "configuration": {
+            "title": "Task Explorer",
+            "properties": {
+                "task-explorer.excludeGroups": {
+                    "type": "array",
+                    "default": [],
+                    "description": "Exclude task groups.",
+                    "items": {
+                        "type": "string"
+                    }
+                }
+            }
         }
     },
     "scripts": {
