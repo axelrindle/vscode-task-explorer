@@ -9,6 +9,19 @@
     "categories": [
         "Other"
     ],
+    "keywords": [
+        "task",
+        "tasks",
+        "task-explorer",
+        "runner",
+        "run",
+        "task-runner"
+    ],
+    "repository": {
+      "type": "git",
+      "url": "https://github.com/axelrindle/vscode-task-explorer.git"
+    },
+    "homepage": "https://github.com/axelrindle/vscode-task-explorer#readme",
     "activationEvents": [],
     "main": "./out/src/extension.js",
     "contributes": {
