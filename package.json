@@ -4,6 +4,7 @@
     "description": "Upgraded Task Explorer GUI inspired by 'Task Explorer' by Scott Meesseman.",
     "version": "0.1.0",
     "publisher": "axelrindle",
+    "icon": "./logo.png",
     "engines": {
         "vscode": "^1.75.0"
     },
