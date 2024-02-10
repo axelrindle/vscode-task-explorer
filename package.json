@@ -20,8 +20,8 @@
         "task-runner"
     ],
     "repository": {
-      "type": "git",
-      "url": "https://github.com/axelrindle/vscode-task-explorer.git"
+        "type": "git",
+        "url": "https://github.com/axelrindle/vscode-task-explorer.git"
     },
     "homepage": "https://github.com/axelrindle/vscode-task-explorer#readme",
     "activationEvents": [],
@@ -94,9 +94,34 @@
                     "items": {
                         "type": "string"
                     }
+                },
+                "task-explorer.exclude": {
+                    "type": "array",
+                    "default": [
+                        "**/node_modules/**"
+                    ],
+                    "description": "Globs of paths to exclude from task scanning.",
+                    "items": {
+                        "type": "string"
+                    }
                 }
             }
-        }
+        },
+        "taskDefinitions": [
+            {
+                "type": "shell",
+                "required": [
+                    "task"
+                ],
+                "when": "shellExecutionSupported",
+                "properties": {
+                    "shell": {
+                        "type": "string",
+                        "description": "The shell used to execute the script file."
+                    }
+                }
+            }
+        ]
     },
     "scripts": {
         "vscode:prepublish": "npm run esbuild-base -- --minify",
