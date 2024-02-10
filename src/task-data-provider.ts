@@ -10,21 +10,35 @@ function makeTaskId(task: Task): string {
     return createHash('md5').update(id).digest('hex')
 }
 
+function makeGroupLabel(label: string): string {
+    switch (label) {
+    case '$composite':
+        return 'Composite Tasks'
+    default:
+        return label
+    }
+}
+
 /**
  * Represents a task group (e.g. npm, shell, etc.)
  */
 export class GroupItem extends TreeItem {
 
+    readonly originalLabel: string
+
     constructor(
         label: string
     ) {
-        super(label, TreeItemCollapsibleState.Collapsed)
+        super(makeGroupLabel(label), TreeItemCollapsibleState.Collapsed)
 
+        this.originalLabel = label
         this.setIconPath()
     }
 
     private iconName(): string {
-        return (this.label as string).replace(/[A-Z]/g, letter => `_${letter.toLowerCase()}`)
+        return (this.originalLabel)
+            .replace(/[A-Z]/g, letter => `_${letter.toLowerCase()}`)
+            .replace(/\$/g, '')
     }
 
     private async setIconPath() {
@@ -32,6 +46,9 @@ export class GroupItem extends TreeItem {
 
         // use product icons where applicable
         switch (name) {
+        case 'composite':
+            this.iconPath = new ThemeIcon('layers')
+            return
         case 'shell':
             this.iconPath = new ThemeIcon('terminal-view-icon')
             return
@@ -75,7 +92,7 @@ export class TaskItem extends TreeItem {
 
 }
 
-type TaskList = Record<string, TaskItem[]>;
+type TaskList = Record<string, TaskItem[]>
 
 export default class TaskDataProvider implements TreeDataProvider<TreeItem> {
 
@@ -99,12 +116,16 @@ export default class TaskDataProvider implements TreeDataProvider<TreeItem> {
         return element
     }
 
-    getChildren(element?: TreeItem | undefined): ProviderResult<TreeItem[]> {
-        if (element) {
-            return this.tasks[element.label as string]
+    getChildren(element?: TreeItem): ProviderResult<TreeItem[]> {
+        if (this.isGroupItem(element)) {
+            return this.tasks[(element as GroupItem).originalLabel as string]
         }
 
         return this.groups
+    }
+
+    private isGroupItem(element?: TreeItem): boolean {
+        return !!element && element.collapsibleState !== TreeItemCollapsibleState.None
     }
 
     private buildArguments(item: Task): string[] {
