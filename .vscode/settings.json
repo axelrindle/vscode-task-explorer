@@ -25,6 +25,6 @@
     "typescript.preferences.quoteStyle": "single",
     "typescript.format.semicolons": "remove",
     "[typescript]": {
-        "editor.formatOnSave": true,
+        "editor.formatOnSave": false,
     },
 }
