@@ -123,6 +123,6 @@
         "typescript": "^5.3.3"
     },
     "dependencies": {
-        "remeda": "^1.40.1"
+        "remeda": "^1.47.1"
     }
 }
