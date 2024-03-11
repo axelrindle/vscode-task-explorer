@@ -20,8 +20,8 @@
         "task-runner"
     ],
     "repository": {
-      "type": "git",
-      "url": "https://github.com/axelrindle/vscode-task-explorer.git"
+        "type": "git",
+        "url": "https://github.com/axelrindle/vscode-task-explorer.git"
     },
     "homepage": "https://github.com/axelrindle/vscode-task-explorer#readme",
     "activationEvents": [],
@@ -113,14 +113,14 @@
         "@types/mocha": "^10.0.6",
         "@types/node": "18.x",
         "@types/vscode": "^1.75.0",
-        "@typescript-eslint/eslint-plugin": "^7.0.0",
-        "@typescript-eslint/parser": "^6.19.1",
+        "@typescript-eslint/eslint-plugin": "^7.1.1",
+        "@typescript-eslint/parser": "^7.1.1",
         "@vscode/test-cli": "^0.0.6",
         "@vscode/test-electron": "^2.3.9",
-        "@vscode/vsce": "^2.23.0",
+        "@vscode/vsce": "^2.24.0",
         "esbuild": "^0.20.1",
-        "eslint": "^8.56.0",
-        "typescript": "^5.3.3"
+        "eslint": "^8.57.0",
+        "typescript": "^5.4.2"
     },
     "dependencies": {
         "remeda": "^1.47.1"
