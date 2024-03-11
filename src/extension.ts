@@ -1,11 +1,22 @@
-import { ExtensionContext, commands, window } from 'vscode'
-import Config from './config'
-import TaskDataProvider, { TaskItem } from './task-data-provider'
+import { AwilixContainer, asClass, asValue, createContainer } from 'awilix'
+import { ExtensionContext } from 'vscode'
+import { TaskExplorerApi } from './api'
+import registerCommands from './commands'
+import Config from './services/config'
+import { Favorites } from './services/favorites'
+import TaskDataProvider from './services/task-data-provider'
 
-export interface TaskExplorerApi {
-    getTasks(): TaskItem[]
-    refresh(): Promise<void>
+interface Services {
+    context: ExtensionContext
+    api: TaskExplorerApi
+    config: Config
+    favorites: Favorites
+    taskDataProvider: TaskDataProvider
+
+    registerCommands: () => void
 }
+
+export type Container = AwilixContainer<Services>
 
 export const EXTENSION_ID = 'task-explorer'
 
@@ -14,38 +25,31 @@ export async function activate(context: ExtensionContext): Promise<TaskExplorerA
         subscriptions,
     } = context
 
-    const config = new Config(context)
-    const treeProvider = new TaskDataProvider(config)
 
-    subscriptions.push(
-        config,
-        window.registerTreeDataProvider(EXTENSION_ID, treeProvider),
-    )
+    // init service container
+    const ioc = createContainer<Services>({
+        strict: true,
+        injectionMode: 'CLASSIC',
+    })
+
+    ioc.register({
+        context: asValue(context),
+        api: asClass(TaskExplorerApi),
+
+        config: asClass(Config),
+        favorites: asClass(Favorites),
+        taskDataProvider: asClass(TaskDataProvider),
+    })
+
+    subscriptions.push(ioc)
 
 
-    //#region Commands
-    subscriptions.push(commands.registerCommand(
-        `${EXTENSION_ID}.refresh-tasks`,
-        async () => await treeProvider.refresh()
-    ))
-
-    subscriptions.push(commands.registerCommand(
-        `${EXTENSION_ID}.favorite-task`,
-        () => window.showInformationMessage('Favoriting tasks in currently work-in-progress.')
-    ))
-
-    subscriptions.push(commands.registerCommand(
-        `${EXTENSION_ID}.unfavorite-task`,
-        () => window.showInformationMessage('Favoriting tasks in currently work-in-progress.')
-    ))
-    //#endregion
+    // register commands
+    registerCommands(ioc)
 
 
     // api
-    return {
-        refresh: () => treeProvider.refresh(),
-        getTasks: () => treeProvider.getTasks(),
-    }
+    return ioc.resolve('api')
 }
 
 export function deactivate() { }

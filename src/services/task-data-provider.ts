@@ -2,8 +2,9 @@ import { createHash } from 'crypto'
 import { stat } from 'fs/promises'
 import { join } from 'path'
 import { groupBy, identity } from 'remeda'
-import { Command, Event, EventEmitter, ProgressLocation, ProviderResult, Task, ThemeIcon, TreeDataProvider, TreeItem, TreeItemCollapsibleState, tasks, window } from 'vscode'
+import { Command, Event, EventEmitter, ExtensionContext, ProgressLocation, ProviderResult, Task, ThemeIcon, TreeDataProvider, TreeItem, TreeItemCollapsibleState, tasks, window } from 'vscode'
 import Config from './config'
+import { EXTENSION_ID } from '../extension'
 
 function makeTaskId(task: Task): string {
     const id = `${task.definition.type}-${task.name.replace(/\s+/g, '_').toLocaleLowerCase()}-${task.source}`
@@ -104,12 +105,20 @@ export default class TaskDataProvider implements TreeDataProvider<TreeItem> {
     private _onDidChangeTreeData: EventEmitter<TreeItem | undefined | void> = new EventEmitter<TreeItem | undefined | void>()
     readonly onDidChangeTreeData: Event<TreeItem | undefined | void> = this._onDidChangeTreeData.event
 
-    constructor(config: Config) {
+    constructor(config: Config, context: ExtensionContext) {
+        const {
+            subscriptions
+        } = context
+
         this.config = config
 
         this.config.on('change', () => this.refresh())
 
         this.refresh()
+
+        subscriptions.push(
+            window.registerTreeDataProvider(EXTENSION_ID, this),
+        )
     }
 
     getTreeItem(element: TreeItem): TreeItem {

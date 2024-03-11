@@ -1,6 +1,6 @@
 import { ExtensionContext, WorkspaceConfiguration, workspace } from 'vscode'
-import TypedEventEmitter from './events'
-import { EXTENSION_ID } from './extension'
+import TypedEventEmitter from '../events'
+import { EXTENSION_ID } from '../extension'
 
 export interface ConfigSchema {
     excludeGroups: string[]
@@ -16,12 +16,16 @@ export default class Config extends TypedEventEmitter<LocalEventTypes> {
 
     private delegate: WorkspaceConfiguration
 
-    constructor({
-        subscriptions
-    }: ExtensionContext) {
+    constructor(context: ExtensionContext) {
         super()
 
+        const {
+            subscriptions
+        } = context
+
         this.delegate = workspace.getConfiguration(EXTENSION_ID)
+
+        subscriptions.push(this)
 
         // listen for config changes
         subscriptions.push(
