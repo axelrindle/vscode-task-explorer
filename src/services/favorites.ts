@@ -38,8 +38,6 @@ export class Favorites extends TypedEventEmitter<LocalEventTypes> implements Dis
         const items = this.context.workspaceState.get<string[]>(storageKey)
         if (Array.isArray(items)) {
             this.items = new Set(items)
-            console.log(`loaded ${items.length} favorites`)
-
             this.notify()
         }
     }
