@@ -3,7 +3,6 @@ import { stat } from 'fs/promises'
 import { join } from 'path'
 import { groupBy, identity } from 'remeda'
 import { Command, Event, EventEmitter, ExtensionContext, ProgressLocation, ProviderResult, Task, ThemeIcon, TreeDataProvider, TreeItem, TreeItemCollapsibleState, tasks, window } from 'vscode'
-import { Disposable } from '../disposable'
 import { EXTENSION_ID } from '../extension'
 import { notEmpty } from '../util'
 import Config from './config'
@@ -131,7 +130,7 @@ export class FavoriteItem extends TaskItem {
 
 type TaskList = Record<string, TaskItem[]>
 
-export default class TaskDataProvider implements TreeDataProvider<TreeItem>, Disposable {
+export default class TaskDataProvider implements TreeDataProvider<TreeItem> {
 
     private config: Config
 
@@ -143,6 +142,8 @@ export default class TaskDataProvider implements TreeDataProvider<TreeItem>, Dis
     readonly onDidChangeTreeData: Event<TreeItem | undefined | void> = this._onDidChangeTreeData.event
 
     constructor(config: Config, context: ExtensionContext, favorites: Favorites) {
+        const { subscriptions } = context
+
         this.config = config
         this.favorites = favorites
 
@@ -150,6 +151,10 @@ export default class TaskDataProvider implements TreeDataProvider<TreeItem>, Dis
         this.favorites.on('change', () => this.refresh())
 
         this.refresh()
+
+        subscriptions.push(
+            window.registerTreeDataProvider(EXTENSION_ID, this)
+        )
     }
 
     getTreeItem(element: TreeItem): TreeItem {
@@ -162,10 +167,6 @@ export default class TaskDataProvider implements TreeDataProvider<TreeItem>, Dis
         }
 
         return this.groups
-    }
-
-    dispose(): void {
-        window.registerTreeDataProvider(EXTENSION_ID, this)
     }
 
     private isGroupItem(element?: TreeItem): boolean {
