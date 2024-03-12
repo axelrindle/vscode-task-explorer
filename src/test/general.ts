@@ -1,8 +1,9 @@
 import assert from 'assert'
 import { extensions } from 'vscode'
-import { EXTENSION_ID, TaskExplorerApi } from '../extension'
+import { EXTENSION_ID } from '../extension'
 
 import { publisher } from '../../package.json'
+import { TaskExplorerApi } from '../api'
 
 const fullExtensionId = `${publisher}.${EXTENSION_ID}`
 
