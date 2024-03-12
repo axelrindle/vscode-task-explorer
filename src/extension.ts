@@ -36,9 +36,9 @@ export async function activate(context: ExtensionContext): Promise<TaskExplorerA
         context: asValue(context),
         api: asClass(TaskExplorerApi),
 
-        config: asClass(Config),
-        favorites: asClass(Favorites),
-        taskDataProvider: asClass(TaskDataProvider),
+        config: asClass(Config).singleton(),
+        favorites: asClass(Favorites).singleton(),
+        taskDataProvider: asClass(TaskDataProvider).singleton(),
     })
 
     subscriptions.push(ioc)
@@ -46,6 +46,11 @@ export async function activate(context: ExtensionContext): Promise<TaskExplorerA
 
     // register commands
     registerCommands(ioc)
+
+
+    // NOTE: TaskDataProvider#refresh() is called automagically by resolving the
+    //       api component below, which itself requires the TaskDataProvider. Thus
+    //       the TaskDataProvider will be resolved and initialized.
 
 
     // api

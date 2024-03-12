@@ -36,12 +36,12 @@
             {
                 "command": "task-explorer.favorite-task",
                 "title": "Add task to favorites",
-                "icon": "$(extensions-star-empty)"
+                "icon": "$(extensions-star-full)"
             },
             {
                 "command": "task-explorer.unfavorite-task",
                 "title": "Remove task from favorites",
-                "icon": "$(extensions-star-full)"
+                "icon": "$(extensions-star-empty)"
             }
         ],
         "viewsContainers": {
@@ -80,6 +80,11 @@
                 {
                     "command": "task-explorer.favorite-task",
                     "when": "view == task-explorer && viewItem == taskItem",
+                    "group": "inline"
+                },
+                {
+                    "command": "task-explorer.unfavorite-task",
+                    "when": "view == task-explorer && viewItem == favoriteItem",
                     "group": "inline"
                 }
             ]

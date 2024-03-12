@@ -1,4 +1,5 @@
 import { ExtensionContext, WorkspaceConfiguration, workspace } from 'vscode'
+import { Disposable } from '../disposable'
 import TypedEventEmitter from '../events'
 import { EXTENSION_ID } from '../extension'
 
@@ -12,7 +13,7 @@ interface LocalEventTypes {
     'change': []
 }
 
-export default class Config extends TypedEventEmitter<LocalEventTypes> {
+export default class Config extends TypedEventEmitter<LocalEventTypes> implements Disposable {
 
     private delegate: WorkspaceConfiguration
 
@@ -24,8 +25,6 @@ export default class Config extends TypedEventEmitter<LocalEventTypes> {
         } = context
 
         this.delegate = workspace.getConfiguration(EXTENSION_ID)
-
-        subscriptions.push(this)
 
         // listen for config changes
         subscriptions.push(

@@ -3,18 +3,31 @@ import { stat } from 'fs/promises'
 import { join } from 'path'
 import { groupBy, identity } from 'remeda'
 import { Command, Event, EventEmitter, ExtensionContext, ProgressLocation, ProviderResult, Task, ThemeIcon, TreeDataProvider, TreeItem, TreeItemCollapsibleState, tasks, window } from 'vscode'
-import Config from './config'
+import { Disposable } from '../disposable'
 import { EXTENSION_ID } from '../extension'
+import { notEmpty } from '../util'
+import Config from './config'
+import { Favorites } from './favorites'
 
-function makeTaskId(task: Task): string {
+const groupKeyFavorites = 'favorites'
+
+function makeTaskId(task: Task, isFavorite: boolean): string {
     const id = `${task.definition.type}-${task.name.replace(/\s+/g, '_').toLocaleLowerCase()}-${task.source}`
-    return createHash('md5').update(id).digest('hex')
+    const hash = createHash('md5').update(id).digest('hex')
+
+    if (isFavorite) {
+        return `favorite-${hash}`
+    }
+
+    return hash
 }
 
 function makeGroupLabel(label: string): string {
     switch (label) {
     case '$composite':
         return 'Composite Tasks'
+    case groupKeyFavorites:
+        return 'Favorite Tasks'
     default:
         return label
     }
@@ -53,6 +66,9 @@ export class GroupItem extends TreeItem {
         case 'shell':
             this.iconPath = new ThemeIcon('terminal-view-icon')
             return
+        case groupKeyFavorites:
+            this.iconPath = new ThemeIcon('star-full')
+            return
         }
 
         const file = join(__dirname, '..', 'resources', 'icons', `${name}.svg`)
@@ -74,51 +90,66 @@ export class GroupItem extends TreeItem {
 
 export class TaskItem extends TreeItem {
 
+    readonly task: Task
     readonly id: string
     readonly group: string
 
     constructor(
         task: Task,
         command: Command,
+        isFavorite: boolean = false,
     ) {
         super(task.name, TreeItemCollapsibleState.None)
 
-        this.id = makeTaskId(task)
-        this.group = task.definition.type
+        this.task = task
+        this.id = makeTaskId(task, isFavorite)
+        this.group = isFavorite ? groupKeyFavorites : task.definition.type
         this.description = task.detail
         this.command = command
+    }
+
+    public get isFavorite() : boolean {
+        return this.group === groupKeyFavorites
     }
 
     contextValue = 'taskItem'
 
 }
 
+export class FavoriteItem extends TaskItem {
+
+    constructor(
+        task: Task,
+        command: Command,
+    ) {
+        super(task, command, true)
+    }
+
+    contextValue = 'favoriteItem'
+
+}
+
 type TaskList = Record<string, TaskItem[]>
 
-export default class TaskDataProvider implements TreeDataProvider<TreeItem> {
+export default class TaskDataProvider implements TreeDataProvider<TreeItem>, Disposable {
 
     private config: Config
 
     private groups: TreeItem[] = []
     private tasks: TaskList = {}
+    private favorites: Favorites
 
     private _onDidChangeTreeData: EventEmitter<TreeItem | undefined | void> = new EventEmitter<TreeItem | undefined | void>()
     readonly onDidChangeTreeData: Event<TreeItem | undefined | void> = this._onDidChangeTreeData.event
 
-    constructor(config: Config, context: ExtensionContext) {
-        const {
-            subscriptions
-        } = context
-
+    constructor(config: Config, context: ExtensionContext, favorites: Favorites) {
         this.config = config
+        this.favorites = favorites
 
         this.config.on('change', () => this.refresh())
+        this.favorites.on('change', () => this.refresh())
 
         this.refresh()
-
-        subscriptions.push(
-            window.registerTreeDataProvider(EXTENSION_ID, this),
-        )
     }
 
     getTreeItem(element: TreeItem): TreeItem {
@@ -131,6 +162,10 @@ export default class TaskDataProvider implements TreeDataProvider<TreeItem> {
         }
 
         return this.groups
+    }
+
+    dispose(): void {
+        window.registerTreeDataProvider(EXTENSION_ID, this)
     }
 
     private isGroupItem(element?: TreeItem): boolean {
@@ -152,7 +187,7 @@ export default class TaskDataProvider implements TreeDataProvider<TreeItem> {
 
         const excludedGroups = this.config.get('excludeGroups')
 
-        return list
+        const result = list
             .filter(item => !excludedGroups?.includes(item.definition.type))
             .map(item => new TaskItem(item, {
                 command: 'workbench.action.tasks.runTask',
@@ -160,6 +195,20 @@ export default class TaskDataProvider implements TreeDataProvider<TreeItem> {
                 arguments: this.buildArguments(item),
             }))
             .sort((a, b) => (a.label as string).localeCompare(b.label as string))
+
+        const favorites = Array.from(this.favorites.list())
+            .map(id => {
+                const item = result.find(item => item.id === id)
+                if (item !== undefined) {
+                    return new FavoriteItem(item.task, item.command!)
+                }
+
+                return undefined
+            })
+            .filter(notEmpty)
+            .sort((a, b) => a.task.name.localeCompare(b.task.name))
+
+        return favorites.concat(result)
     }
 
     async refresh(): Promise<void> {
@@ -176,7 +225,16 @@ export default class TaskDataProvider implements TreeDataProvider<TreeItem> {
                     item => item.group
                 )
                 this.groups = Object.keys(this.tasks)
-                    .sort()
+                    .sort((a, b) => {
+                        if (a === groupKeyFavorites) {
+                            return -1
+                        }
+                        else if (b === groupKeyFavorites) {
+                            return 1
+                        }
+
+                        return a.localeCompare(b)
+                    })
                     .map(key => new GroupItem(key))
 
                 this._onDidChangeTreeData.fire()

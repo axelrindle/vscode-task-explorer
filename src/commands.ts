@@ -1,9 +1,11 @@
-import { commands, window } from 'vscode'
+import { commands } from 'vscode'
 import { Container, EXTENSION_ID } from './extension'
+import { TaskItem } from './services/task-data-provider'
 
 export default function registerCommands(ioc: Container) {
     const context = ioc.resolve('context')
     const taskDataProvider = ioc.resolve('taskDataProvider')
+    const favorites = ioc.resolve('favorites')
 
     const {
         subscriptions,
@@ -16,11 +18,11 @@ export default function registerCommands(ioc: Container) {
         ),
         commands.registerCommand(
             `${EXTENSION_ID}.favorite-task`,
-            () => window.showInformationMessage('Favoriting tasks in currently work-in-progress.')
+            (item: TaskItem) => favorites.add(item)
         ),
         commands.registerCommand(
             `${EXTENSION_ID}.unfavorite-task`,
-            () => window.showInformationMessage('Favoriting tasks in currently work-in-progress.')
+            (item: TaskItem) => favorites.remove(item)
         ),
     )
 }
