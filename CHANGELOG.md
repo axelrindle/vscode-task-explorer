@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## v0.2.1 - 2024-03-12
+
+### Fixed
+
+- An internal resolving mechanism failed due to the code being minified. Code won't be minified anymore.
+
 ## v0.2.0 - 2024-03-12
 
 ### Added
