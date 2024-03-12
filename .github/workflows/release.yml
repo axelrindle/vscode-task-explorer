@@ -21,12 +21,6 @@ jobs:
       - run: npm ci
       - run: npm run package
 
-      - id: version
-        name: Check Version Format in Tag
-        uses: nowsprinting/check-version-format-action@v4
-        with:
-          prefix: 'v'
-
       - id: extract-changelog
         uses: sean0x42/markdown-extract@v2
         with:
@@ -36,7 +30,6 @@ jobs:
       - name: Create Release
         uses: softprops/action-gh-release@v1
         with:
-          prerelease: steps.version.outputs.is_stable != 'true'
           body: |
             ## Changelog
             ${{ steps.extract-changelog.outputs.markdown }}

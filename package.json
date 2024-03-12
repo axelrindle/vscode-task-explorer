@@ -2,7 +2,7 @@
     "name": "task-explorer",
     "displayName": "Task Explore",
     "description": "Upgraded Task Explorer GUI inspired by 'Task Explorer' by Scott Meesseman.",
-    "version": "0.1.0",
+    "version": "0.2.0",
     "publisher": "axelrindle",
     "icon": "./logo.png",
     "engines": {
