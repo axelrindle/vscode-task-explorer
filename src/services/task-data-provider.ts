@@ -32,6 +32,40 @@ function makeGroupLabel(label: string): string {
     }
 }
 
+function makeGroupName(name: string): string {
+    return name
+        .replace(/[A-Z]/g, letter => `_${letter.toLowerCase()}`)
+        .replace(/\$/g, '')
+}
+
+async function getIconPath(name: string): Promise<TreeItem['iconPath']> {
+    // use product icons where applicable
+    switch (name) {
+    case 'composite':
+        return new ThemeIcon('layers')
+    case 'shell':
+        return new ThemeIcon('terminal-view-icon')
+    case groupKeyFavorites:
+        return new ThemeIcon('star-full')
+    }
+
+    const file = join(__dirname, '..', 'resources', 'icons', `${name}.svg`)
+
+    try {
+        const stats = await stat(file)
+        if (stats.isFile()) {
+            return {
+                light: file,
+                dark: file
+            }
+        }
+    } catch (error) {
+        // ¯\_(ツ)_/¯
+    }
+
+    return undefined
+}
+
 /**
  * Represents a task group (e.g. npm, shell, etc.)
  */
@@ -48,41 +82,9 @@ export class GroupItem extends TreeItem {
         this.setIconPath()
     }
 
-    private iconName(): string {
-        return (this.originalLabel)
-            .replace(/[A-Z]/g, letter => `_${letter.toLowerCase()}`)
-            .replace(/\$/g, '')
-    }
-
     private async setIconPath() {
-        const name = this.iconName()
-
-        // use product icons where applicable
-        switch (name) {
-        case 'composite':
-            this.iconPath = new ThemeIcon('layers')
-            return
-        case 'shell':
-            this.iconPath = new ThemeIcon('terminal-view-icon')
-            return
-        case groupKeyFavorites:
-            this.iconPath = new ThemeIcon('star-full')
-            return
-        }
-
-        const file = join(__dirname, '..', 'resources', 'icons', `${name}.svg`)
-
-        try {
-            const stats = await stat(file)
-            if (stats.isFile()) {
-                this.iconPath = {
-                    light: file,
-                    dark: file
-                }
-            }
-        } catch (error) {
-            // ¯\_(ツ)_/¯
-        }
+        const name = makeGroupName(this.originalLabel)
+        this.iconPath = await getIconPath(name)
     }
 
 }
@@ -122,6 +124,13 @@ export class FavoriteItem extends TaskItem {
         command: Command,
     ) {
         super(task, command, true)
+
+        this.setIconPath()
+    }
+
+    private async setIconPath() {
+        const name = makeGroupName(this.task.definition.type)
+        this.iconPath = await getIconPath(name)
     }
 
     contextValue = 'favoriteItem'
