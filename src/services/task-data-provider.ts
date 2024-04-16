@@ -216,7 +216,7 @@ export default class TaskDataProvider implements TreeDataProvider<TreeItem> {
                 return undefined
             })
             .filter(notEmpty)
-            .sort((a, b) => a.task.name.localeCompare(b.task.name))
+            .sort((a, b) => a.task.name.localeCompare(b.task.name)) as TaskItem[]
 
         return favorites.concat(result)
     }
