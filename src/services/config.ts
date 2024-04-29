@@ -48,7 +48,7 @@ export default class Config extends TypedEventEmitter<LocalEventTypes> implement
         return this.delegate.has(key)
     }
 
-    get<T extends ConfigKey>(key: ConfigKey): ConfigSchema[T] | undefined {
+    get<T extends ConfigKey>(key: T): ConfigSchema[T] | undefined {
         return this.delegate.get<ConfigSchema[T]>(key)
     }
 
