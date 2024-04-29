@@ -7,6 +7,7 @@ import { EXTENSION_ID } from '../extension'
 import { notEmpty } from '../util'
 import Config from './config'
 import { Favorites } from './favorites'
+import { Mutex } from 'async-mutex'
 
 const groupKeyFavorites = 'favorites'
 
@@ -142,10 +143,12 @@ type TaskList = Record<string, TaskItem[]>
 export default class TaskDataProvider implements TreeDataProvider<TreeItem> {
 
     private config: Config
+    private favorites: Favorites
+
+    private mutex: Mutex
 
     private groups: TreeItem[] = []
     private tasks: TaskList = {}
-    private favorites: Favorites
 
     private _onDidChangeTreeData: EventEmitter<TreeItem | undefined | void> = new EventEmitter<TreeItem | undefined | void>()
     readonly onDidChangeTreeData: Event<TreeItem | undefined | void> = this._onDidChangeTreeData.event
@@ -155,6 +158,8 @@ export default class TaskDataProvider implements TreeDataProvider<TreeItem> {
 
         this.config = config
         this.favorites = favorites
+
+        this.mutex = new Mutex()
 
         this.config.on('change', () => this.refresh())
         this.favorites.on('change', () => this.refresh())
@@ -222,34 +227,40 @@ export default class TaskDataProvider implements TreeDataProvider<TreeItem> {
     }
 
     async refresh(): Promise<void> {
-        await window.withProgress(
-            {
-                location: ProgressLocation.Notification,
-                cancellable: false,
-            },
-            async () => {
-                const list = await this.fetchTasks()
+        const release = await this.mutex.acquire()
 
-                this.tasks = groupBy(
-                    list,
-                    item => item.group
-                )
-                this.groups = Object.keys(this.tasks)
-                    .sort((a, b) => {
-                        if (a === groupKeyFavorites) {
-                            return -1
-                        }
-                        else if (b === groupKeyFavorites) {
-                            return 1
-                        }
+        try {
+            await window.withProgress(
+                {
+                    location: ProgressLocation.Notification,
+                    cancellable: false,
+                },
+                async () => {
+                    const list = await this.fetchTasks()
 
-                        return a.localeCompare(b)
-                    })
-                    .map(key => new GroupItem(key))
+                    this.tasks = groupBy(
+                        list,
+                        item => item.group
+                    )
+                    this.groups = Object.keys(this.tasks)
+                        .sort((a, b) => {
+                            if (a === groupKeyFavorites) {
+                                return -1
+                            }
+                            else if (b === groupKeyFavorites) {
+                                return 1
+                            }
 
-                this._onDidChangeTreeData.fire()
-            }
-        )
+                            return a.localeCompare(b)
+                        })
+                        .map(key => new GroupItem(key))
+
+                    this._onDidChangeTreeData.fire()
+                }
+            )
+        } finally {
+            release()
+        }
     }
 
     getTasks(): TaskItem[] {
