@@ -103,7 +103,9 @@
                 "task-explorer.exclude": {
                     "type": "array",
                     "default": [
-                        "**/node_modules/**"
+                        "**/node_modules/**",
+                        "**/vendor/**",
+                        "**/.git/**"
                     ],
                     "description": "Globs of paths to exclude from task scanning.",
                     "items": {
