@@ -52,4 +52,8 @@ export default class Config extends TypedEventEmitter<LocalEventTypes> implement
         return this.delegate.get<ConfigSchema[T]>(key)
     }
 
+    getOr<T extends ConfigKey>(key: T, or: ConfigSchema[T]): ConfigSchema[T] {
+        return this.delegate.get<ConfigSchema[T]>(key) ?? or
+    }
+
 }
