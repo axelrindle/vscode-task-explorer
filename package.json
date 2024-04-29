@@ -99,9 +99,39 @@
                     "items": {
                         "type": "string"
                     }
+                },
+                "task-explorer.exclude": {
+                    "type": "array",
+                    "default": [
+                        "**/node_modules/**"
+                    ],
+                    "description": "Globs of paths to exclude from task scanning.",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "task-explorer.scanShell": {
+                    "type": "boolean",
+                    "default": true,
+                    "description": "Whether to scan for additional shell files. Reload window for the changes to take effect."
                 }
             }
-        }
+        },
+        "taskDefinitions": [
+            {
+                "type": "shell",
+                "required": [
+                    "task"
+                ],
+                "when": "shellExecutionSupported",
+                "properties": {
+                    "shell": {
+                        "type": "string",
+                        "description": "The shell used to execute the script file."
+                    }
+                }
+            }
+        ]
     },
     "scripts": {
         "vscode:prepublish": "npm run esbuild-base",

@@ -5,6 +5,9 @@ import { EXTENSION_ID } from '../extension'
 
 export interface ConfigSchema {
     excludeGroups: string[]
+    exclude: string[]
+
+    scanShell: boolean
 }
 
 type ConfigKey = keyof ConfigSchema
