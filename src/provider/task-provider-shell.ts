@@ -50,7 +50,21 @@ export default class TaskProviderShell implements TaskProvider<ShellTask> {
             const name = basename(file.path)
             const folder = workspace.getWorkspaceFolder(file)
 
-            // TODO: Get hashbang
+            let executable = this.config.getOr('defaultShell', '/bin/bash')
+            let shellArgs: string[] = []
+
+            const contents = await workspace.fs.readFile(file)
+            const lines = contents.toString().split('\n')
+            if (lines.length > 0) {
+                const firstLine = lines[0].replace('\r', '')
+
+                if (firstLine.startsWith('#!')) {
+                    const parts = firstLine.split(' ')
+
+                    executable = parts[0].replace('#!', '')
+                    shellArgs = parts.slice(1)
+                }
+            }
 
             const task = new ShellTask(
                 new ShellTaskDefinition(),
@@ -61,7 +75,7 @@ export default class TaskProviderShell implements TaskProvider<ShellTask> {
                     file.fsPath,
                     {
                         cwd: folder?.uri.fsPath,
-                        executable: '/bin/bash',
+                        executable, shellArgs
                     }
                 )
             )

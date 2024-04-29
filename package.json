@@ -116,6 +116,11 @@
                     "type": "boolean",
                     "default": true,
                     "description": "Whether to scan for additional shell files. Reload window for the changes to take effect."
+                },
+                "task-explorer.defaultShell": {
+                    "type": "string",
+                    "default": "/bin/bash",
+                    "description": "The default shell to use for shell tasks."
                 }
             }
         },

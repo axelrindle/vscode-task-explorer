@@ -8,6 +8,8 @@ export interface ConfigSchema {
     exclude: string[]
 
     scanShell: boolean
+
+    defaultShell: string
 }
 
 type ConfigKey = keyof ConfigSchema
