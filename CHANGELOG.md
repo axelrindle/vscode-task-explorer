@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- Display the respective icon next to a favorite task
+- Custom task provider for Laravel Artisan commands
+- Custom task provider for shell files (`.sh`)
+
 ## v0.2.1 - 2024-03-12
 
 ### Fixed
