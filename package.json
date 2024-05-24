@@ -112,10 +112,15 @@
                         "type": "string"
                     }
                 },
+                "task-explorer.scanArtisan": {
+                    "type": "boolean",
+                    "default": true,
+                    "description": "Whether to scan for Laravel Artisan tasks. Auto-refresh is unsupported."
+                },
                 "task-explorer.scanShell": {
                     "type": "boolean",
                     "default": true,
-                    "description": "Whether to scan for additional shell files. Reload window for the changes to take effect."
+                    "description": "Whether to scan for additional shell files."
                 },
                 "task-explorer.defaultShell": {
                     "type": "string",

@@ -7,6 +7,7 @@ export interface ConfigSchema {
     excludeGroups: string[]
     exclude: string[]
 
+    scanArtisan: boolean
     scanShell: boolean
 
     defaultShell: string
