@@ -58,7 +58,7 @@ export class Favorites extends TypedEventEmitter<LocalEventTypes> implements Dis
     }
 
     remove(item: TaskItem): void {
-        const id = item.id.substring(9)
+        const id = item.id.startsWith('favorite') ? item.id.substring(9) : item.id
         if (this.items.delete(id)) {
             this.notify()
             this.save()

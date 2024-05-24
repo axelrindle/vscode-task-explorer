@@ -1,13 +1,12 @@
+import { Mutex } from 'async-mutex'
 import { createHash } from 'crypto'
 import { stat } from 'fs/promises'
 import { join } from 'path'
 import { groupBy, identity } from 'remeda'
-import { Command, Event, EventEmitter, ExtensionContext, ProgressLocation, ProviderResult, Task, ThemeIcon, TreeDataProvider, TreeItem, TreeItemCollapsibleState, tasks, window } from 'vscode'
-import { EXTENSION_ID } from '../extension'
+import { Command, Event, EventEmitter, ProgressLocation, ProviderResult, Task, ThemeIcon, TreeDataProvider, TreeItem, TreeItemCollapsibleState, tasks, window } from 'vscode'
 import { notEmpty } from '../util'
 import Config from './config'
 import { Favorites } from './favorites'
-import { Mutex } from 'async-mutex'
 
 const groupKeyFavorites = 'favorites'
 
@@ -120,12 +119,15 @@ export class TaskItem extends TreeItem {
 
 export class FavoriteItem extends TaskItem {
 
+    readonly originalId: string
+
     constructor(
         task: Task,
         command: Command,
     ) {
         super(task, command, true)
 
+        this.originalId = makeTaskId(task, false)
         this.setIconPath()
     }
 
@@ -153,9 +155,7 @@ export default class TaskDataProvider implements TreeDataProvider<TreeItem> {
     private _onDidChangeTreeData: EventEmitter<TreeItem | undefined | void> = new EventEmitter<TreeItem | undefined | void>()
     readonly onDidChangeTreeData: Event<TreeItem | undefined | void> = this._onDidChangeTreeData.event
 
-    constructor(config: Config, context: ExtensionContext, favorites: Favorites) {
-        const { subscriptions } = context
-
+    constructor(config: Config, favorites: Favorites) {
         this.config = config
         this.favorites = favorites
 
@@ -165,10 +165,6 @@ export default class TaskDataProvider implements TreeDataProvider<TreeItem> {
         this.favorites.on('change', () => this.refresh())
 
         this.refresh()
-
-        subscriptions.push(
-            window.registerTreeDataProvider(EXTENSION_ID, this)
-        )
     }
 
     getTreeItem(element: TreeItem): TreeItem {
@@ -221,9 +217,16 @@ export default class TaskDataProvider implements TreeDataProvider<TreeItem> {
                 return undefined
             })
             .filter(notEmpty)
-            .sort((a, b) => a.task.name.localeCompare(b.task.name)) as TaskItem[]
+            .sort((a, b) => a.task.name.localeCompare(b.task.name)) as FavoriteItem[]
 
-        return favorites.concat(result)
+        for (const task of result) {
+            const index = favorites.findIndex(fav => fav.originalId == task.id)
+            if (index != -1) {
+                task.contextValue = 'favoriteItem'
+            }
+        }
+
+        return [...favorites, ...result]
     }
 
     async refresh(): Promise<void> {
