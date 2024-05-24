@@ -1,7 +1,7 @@
 import { execFile } from 'child_process'
 import { dirname } from 'path'
 import { promisify } from 'util'
-import { CancellationToken, ProviderResult, ShellExecution, Task, TaskDefinition, TaskProvider, TaskScope, Uri, window, workspace,  } from 'vscode'
+import { CancellationToken, ProviderResult, ShellExecution, Task, TaskDefinition, TaskProvider, TaskScope, window, workspace } from 'vscode'
 
 export const TASK_TYPE_ARTISAN = 'artisan'
 export const TASK_GLOB_ARTISAN = 'artisan'
@@ -67,6 +67,7 @@ export default class TaskProviderArtisan implements TaskProvider<ArtisanTask> {
                             hidden: found?.hidden,
                         }
                     })
+                    .filter(info => info.name !== '_complete')
                     .map(info => {
                         const task = new ArtisanTask(
                             new ArtisanTaskDefinition(),
@@ -82,7 +83,8 @@ export default class TaskProviderArtisan implements TaskProvider<ArtisanTask> {
                     })
 
                 tasks.push(...newTasks)
-            } catch (error) {
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            } catch (error: any) {
                 console.error(error)
                 window.showErrorMessage(error.message)
                 break
