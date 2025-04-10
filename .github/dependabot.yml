@@ -1,0 +1,9 @@
+version: 2
+updates:
+  - directory: /
+    package-ecosystem: npm
+    schedule:
+      interval: monthly
+    ignore:
+      - dependency-name: "@types/node"
+      - dependency-name: "@types/vscode"
