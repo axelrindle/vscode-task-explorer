@@ -167,7 +167,7 @@
         "@vscode/vsce": "^2.26.0",
         "esbuild": "^0.20.2",
         "eslint": "^8.57.0",
-        "typescript": "^5.4.5"
+        "typescript": "^5.8.3"
     },
     "dependencies": {
         "async-mutex": "^0.5.0",
